@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Chat with PDF</title>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+margin:0;
+background:#f7f7f8;
+}
+
+.header{
+background:white;
+border-bottom:1px solid #ddd;
+padding:15px;
+font-size:18px;
+font-weight:bold;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+display:flex;
+flex-direction:column;
+height:90vh;
+}
+
+.upload{
+background:white;
+padding:10px;
+border-bottom:1px solid #ddd;
+}
+
+.chat{
+flex:1;
+overflow-y:auto;
+padding:20px;
+}
+
+.message{
+margin:10px 0;
+padding:12px;
+border-radius:8px;
+max-width:70%;
+}
+
+.user{
+background:#dbeafe;
+margin-left:auto;
+}
+
+.bot{
+background:white;
+border:1px solid #e5e5e5;
+}
+
+.input-area{
+display:flex;
+padding:10px;
+background:white;
+border-top:1px solid #ddd;
+}
+
+input{
+flex:1;
+padding:10px;
+border:1px solid #ccc;
+border-radius:6px;
+}
+
+button{
+margin-left:10px;
+padding:10px 15px;
+background:#10a37f;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<span>📄 Chat with your PDF</span>
+<button onclick="clearChat()">New Chat</button>
+</div>
+
+<div class="container">
+
+<div class="upload">
+<input type="file" id="pdf" multiple>
+<button onclick="uploadPDF()">Upload PDF</button>
+</div>
+
+<div id="chat" class="chat"></div>
+
+<div class="input-area">
+<input id="question" placeholder="Send a message..." onkeypress="enter(event)">
+<button onclick="ask()">Send</button>
+</div>
+
+</div>
+
+<script>
+
+async function uploadPDF(){
+
+let files = document.getElementById("pdf").files
+
+if(files.length === 0){
+alert("Select PDF files first")
+return
+}
+
+let data = new FormData()
+
+for(let i=0;i<files.length;i++){
+data.append("files",files[i])
+}
+
+let res = await fetch("/upload",{
+method:"POST",
+body:data
+})
+
+let result = await res.json()
+
+alert(result.message)
+
+}
+
+function addMessage(text,type){
+
+let chat=document.getElementById("chat")
+
+let div=document.createElement("div")
+div.className="message "+type
+div.innerText=text
+
+chat.appendChild(div)
+
+chat.scrollTop=chat.scrollHeight
+
+}
+
+async function ask(){
+
+let q=document.getElementById("question").value
+
+if(!q) return
+
+addMessage(q,"user")
+
+document.getElementById("question").value=""
+
+let res=await fetch(`/ask?question=${q}`)
+let data=await res.json()
+
+addMessage(data.answer,"bot")
+
+}
+
+function enter(e){
+if(e.key==="Enter"){
+ask()
+}
+}
+
+function clearChat(){
+document.getElementById("chat").innerHTML=""
+}
+
+</script>
+
+</body>
+</html>
