@@ -57,3 +57,6 @@ rag-pdf-chatbot
 ├── index.html
 ├── requirements.txt
 └── README.md
+## Output
+
+![PDF Chatbot Output](images/output.png)
